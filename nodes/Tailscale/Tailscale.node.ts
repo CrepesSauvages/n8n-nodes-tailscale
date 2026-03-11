@@ -18,6 +18,7 @@ export class Tailscale implements INodeType {
         outputs: [NodeConnectionTypes.Main],
         credentials: [
             {
+                // eslint-disable-next-line @n8n/community-nodes/no-credential-reuse
                 name: 'tailscaleApi',
                 required: true,
                 displayOptions: {
@@ -27,6 +28,7 @@ export class Tailscale implements INodeType {
                 },
             },
             {
+                // eslint-disable-next-line @n8n/community-nodes/no-credential-reuse
                 name: 'tailscaleOAuth2Api',
                 required: true,
                 displayOptions: {
