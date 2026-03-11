@@ -29,6 +29,8 @@
         "credentials/**/*",
         "nodes/**/*",
         "nodes/**/*.json",
+        "tests/**/*",
+        "vitest.config.ts",
         "package.json"
     ]
 }

@@ -7,6 +7,7 @@ import {
     type INodeTypeDescription,
 } from 'n8n-workflow';
 import { deviceDescription } from './resources/device';
+import { dnsDescription } from './resources/dns';
 
 export class Tailscale implements INodeType {
     description: INodeTypeDescription = {
@@ -90,10 +91,15 @@ export class Tailscale implements INodeType {
                         name: 'Device',
                         value: 'device',
                     },
+                    {
+                        name: 'DNS',
+                        value: 'dns',
+                    },
                 ],
                 default: 'device',
             },
             ...deviceDescription,
+            ...dnsDescription,
         ],
     };
 
