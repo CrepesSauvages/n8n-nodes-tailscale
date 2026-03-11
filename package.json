@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-tailscale",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "n8n community node for Tailscale — manage devices in your tailnet",
   "license": "MIT",
   "homepage": "https://github.com/CrepesSauvages/n8n-nodes-tailscale",
