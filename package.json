@@ -1,0 +1,47 @@
+{
+  "name": "n8n-nodes-tailscale",
+  "version": "0.1.0",
+  "description": "n8n community node for Tailscale — manage devices in your tailnet",
+  "license": "MIT",
+  "homepage": "https://github.com/CrepesSauvages/n8n-nodes-tailscale",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "tailscale",
+    "vpn",
+    "wireguard",
+    "network"
+  ],
+  "author": { "name": "CrepesSauvages" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CrepesSauvages/n8n-nodes-tailscale.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": ["dist"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/TailscaleApi.credentials.js",
+      "dist/credentials/TailscaleOAuth2Api.credentials.js"
+    ],
+    "nodes": ["dist/nodes/Tailscale/Tailscale.node.js"]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "eslint": "9.32.0",
+    "n8n-workflow": "^2.12.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": { "n8n-workflow": "*" }
+}
