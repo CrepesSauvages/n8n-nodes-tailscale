@@ -63,6 +63,15 @@ export class Tailscale implements INodeType {
                 default: 'apiKey',
             },
             {
+                displayName: 'Tailnet',
+                name: 'tailnet',
+                type: 'string',
+                default: '-',
+                required: true,
+                description:
+                    'Your tailnet organization name (e.g. "example.com") or "-" for the default tailnet of the authenticated user',
+            },
+            {
                 displayName: 'Resource',
                 name: 'resource',
                 type: 'options',

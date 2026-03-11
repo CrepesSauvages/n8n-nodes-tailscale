@@ -70,7 +70,7 @@ const getOperation: INodeProperties = {
             routing: {
                 request: {
                     method: 'GET',
-                    url: '=/api/v2/tailnet/{{$credentials.tailnet}}/devices',
+                    url: '=/api/v2/tailnet/{{$parameter.tailnet}}/devices',
                 },
                 output: {
                     postReceive: [
