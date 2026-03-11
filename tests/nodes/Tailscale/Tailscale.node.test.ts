@@ -195,7 +195,7 @@ describe('Tailscale Node', () => {
             );
             await node.methods.loadOptions.getDevices.call(ctx);
             const callArgs = (
-                ctx.helpers.httpRequestWithAuthentication as { call: ReturnType<typeof vi.fn> }
+                ctx.helpers.httpRequestWithAuthentication as unknown as { call: ReturnType<typeof vi.fn> }
             ).call.mock.calls[0];
             expect(callArgs[2].url).toContain(encodeURIComponent('my tailnet'));
         });

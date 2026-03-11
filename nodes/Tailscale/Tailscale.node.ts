@@ -92,6 +92,7 @@ export class Tailscale implements INodeType {
                         value: 'device',
                     },
                     {
+                        // eslint-disable-next-line n8n-nodes-base/node-param-resource-with-plural-option
                         name: 'DNS',
                         value: 'dns',
                     },
