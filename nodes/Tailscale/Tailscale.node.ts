@@ -1,4 +1,11 @@
-import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import {
+    NodeConnectionTypes,
+    type IAllExecuteFunctions,
+    type ILoadOptionsFunctions,
+    type INodePropertyOptions,
+    type INodeType,
+    type INodeTypeDescription,
+} from 'n8n-workflow';
 import { deviceDescription } from './resources/device';
 
 export class Tailscale implements INodeType {
@@ -63,13 +70,15 @@ export class Tailscale implements INodeType {
                 default: 'apiKey',
             },
             {
-                displayName: 'Tailnet',
+                displayName: 'Tailnet Name or ID',
                 name: 'tailnet',
-                type: 'string',
-                default: '-',
+                type: 'options',
                 required: true,
-                description:
-                    'Your tailnet organization name (e.g. "example.com") or "-" for the default tailnet of the authenticated user',
+                default: '-',
+                description: 'Your tailnet organization name. Choose from the list or select "-" for the default tailnet of the authenticated user. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+                typeOptions: {
+                    loadOptionsMethod: 'getTailnets',
+                },
             },
             {
                 displayName: 'Resource',
@@ -86,5 +95,86 @@ export class Tailscale implements INodeType {
             },
             ...deviceDescription,
         ],
+    };
+
+    methods = {
+        loadOptions: {
+            async getTailnets(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const authentication =
+                    (this.getCurrentNodeParameters()?.authentication as string) ?? 'apiKey';
+                const credentialType =
+                    authentication === 'oAuth2' ? 'tailscaleOAuth2Api' : 'tailscaleApi';
+                const credentials = await this.getCredentials(credentialType);
+
+                const options: INodePropertyOptions[] = [
+                    { name: 'Default (-)', value: '-' },
+                ];
+
+                if (credentials.tailnet && credentials.tailnet !== '-') {
+                    options.push({
+                        name: credentials.tailnet as string,
+                        value: credentials.tailnet as string,
+                    });
+                }
+
+                return options;
+            },
+
+            async getDevices(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const authentication =
+                    (this.getCurrentNodeParameters()?.authentication as string) ?? 'apiKey';
+                const credentialType =
+                    authentication === 'oAuth2' ? 'tailscaleOAuth2Api' : 'tailscaleApi';
+                const tailnet =
+                    (this.getCurrentNodeParameters()?.tailnet as string) ?? '-';
+
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                        this as unknown as IAllExecuteFunctions,
+                        credentialType,
+                        {
+                            method: 'GET',
+                            url: `https://api.tailscale.com/api/v2/tailnet/${encodeURIComponent(tailnet)}/devices`,
+                            headers: { Accept: 'application/json' },
+                            json: true,
+                        },
+                    );
+
+                return (response.devices ?? []).map(
+                    (d: { hostname: string; name: string; nodeId: string }) => ({
+                        name: `${d.hostname} (${d.nodeId})`,
+                        value: d.nodeId,
+                    }),
+                );
+            },
+
+            async getTags(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const authentication =
+                    (this.getCurrentNodeParameters()?.authentication as string) ?? 'apiKey';
+                const credentialType =
+                    authentication === 'oAuth2' ? 'tailscaleOAuth2Api' : 'tailscaleApi';
+                const tailnet =
+                    (this.getCurrentNodeParameters()?.tailnet as string) ?? '-';
+
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                        this as unknown as IAllExecuteFunctions,
+                        credentialType,
+                        {
+                            method: 'GET',
+                            url: `https://api.tailscale.com/api/v2/tailnet/${encodeURIComponent(tailnet)}/devices`,
+                            headers: { Accept: 'application/json' },
+                            json: true,
+                        },
+                    );
+
+                const tagSet = new Set<string>();
+                for (const device of response.devices ?? []) {
+                    for (const tag of device.tags ?? []) {
+                        tagSet.add(tag as string);
+                    }
+                }
+
+                return Array.from(tagSet).map((tag) => ({ name: tag, value: tag }));
+            },
+        },
     };
 }

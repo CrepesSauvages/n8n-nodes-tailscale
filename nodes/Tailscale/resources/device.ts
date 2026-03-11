@@ -24,6 +24,16 @@ const getOperation: INodeProperties = {
                         authorized: true,
                     },
                 },
+                output: {
+                    postReceive: [
+                        {
+                            type: 'set',
+                            properties: {
+                                value: '={{ { "success": true, "deviceId": $parameter.deviceId } }}',
+                            },
+                        },
+                    ],
+                },
             },
         },
         {
@@ -36,6 +46,16 @@ const getOperation: INodeProperties = {
                     method: 'DELETE',
                     url: '=/api/v2/device/{{$parameter.deviceId}}',
                 },
+                output: {
+                    postReceive: [
+                        {
+                            type: 'set',
+                            properties: {
+                                value: '={{ { "success": true, "deviceId": $parameter.deviceId } }}',
+                            },
+                        },
+                    ],
+                },
             },
         },
         {
@@ -47,6 +67,16 @@ const getOperation: INodeProperties = {
                 request: {
                     method: 'POST',
                     url: '=/api/v2/device/{{$parameter.deviceId}}/expire',
+                },
+                output: {
+                    postReceive: [
+                        {
+                            type: 'set',
+                            properties: {
+                                value: '={{ { "success": true, "deviceId": $parameter.deviceId } }}',
+                            },
+                        },
+                    ],
                 },
             },
         },
@@ -113,12 +143,15 @@ const getOperation: INodeProperties = {
 };
 
 const deviceIdField: INodeProperties = {
-    displayName: 'Device ID',
+    displayName: 'Device Name or ID',
     name: 'deviceId',
-    type: 'string',
+    type: 'options',
     required: true,
     default: '',
-    description: 'The ID of the device (nodeId)',
+    description: 'The device to operate on. Choose from the list or enter a node ID manually. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+    typeOptions: {
+        loadOptionsMethod: 'getDevices',
+    },
     displayOptions: {
         show: {
             resource: ['device'],
@@ -128,14 +161,15 @@ const deviceIdField: INodeProperties = {
 };
 
 const tagsField: INodeProperties = {
-    displayName: 'Tags',
+    displayName: 'Tag Names or IDs',
     name: 'tags',
-    type: 'string',
+    type: 'multiOptions',
     required: true,
-    default: '',
-    placeholder: 'tag:server,tag:production',
-    description:
-        'Comma-separated list of ACL tags to assign (e.g. "tag:server,tag:production"). Each tag must start with "tag:".',
+    default: [],
+    description: 'ACL tags to assign to the device. Tags are collected from existing devices in the tailnet. Each tag must start with "tag:". Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+    typeOptions: {
+        loadOptionsMethod: 'getTags',
+    },
     displayOptions: {
         show: {
             resource: ['device'],
@@ -146,7 +180,7 @@ const tagsField: INodeProperties = {
         send: {
             type: 'body',
             property: 'tags',
-            value: '={{$value.split(",").map(t => t.trim())}}',
+            value: '={{$value}}',
         },
     },
 };
