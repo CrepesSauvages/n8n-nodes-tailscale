@@ -8,6 +8,8 @@ import {
 } from 'n8n-workflow';
 import { deviceDescription } from './resources/device';
 import { dnsDescription } from './resources/dns';
+import { authKeyDescription } from './resources/authKey';
+import { aclDescription } from './resources/acl';
 
 export class Tailscale implements INodeType {
     description: INodeTypeDescription = {
@@ -26,7 +28,6 @@ export class Tailscale implements INodeType {
         outputs: [NodeConnectionTypes.Main],
         credentials: [
             {
-                // eslint-disable-next-line @n8n/community-nodes/no-credential-reuse
                 name: 'tailscaleApi',
                 required: true,
                 displayOptions: {
@@ -36,7 +37,6 @@ export class Tailscale implements INodeType {
                 },
             },
             {
-                // eslint-disable-next-line @n8n/community-nodes/no-credential-reuse
                 name: 'tailscaleOAuth2Api',
                 required: true,
                 displayOptions: {
@@ -88,6 +88,14 @@ export class Tailscale implements INodeType {
                 noDataExpression: true,
                 options: [
                     {
+                        name: 'ACL / Policy',
+                        value: 'acl',
+                    },
+                    {
+                        name: 'Auth Key',
+                        value: 'authKey',
+                    },
+                    {
                         name: 'Device',
                         value: 'device',
                     },
@@ -99,6 +107,8 @@ export class Tailscale implements INodeType {
                 ],
                 default: 'device',
             },
+            ...aclDescription,
+            ...authKeyDescription,
             ...deviceDescription,
             ...dnsDescription,
         ],
@@ -150,6 +160,33 @@ export class Tailscale implements INodeType {
                     (d: { hostname: string; name: string; nodeId: string }) => ({
                         name: `${d.hostname} (${d.nodeId})`,
                         value: d.nodeId,
+                    }),
+                );
+            },
+
+            async getAuthKeys(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const authentication =
+                    (this.getCurrentNodeParameters()?.authentication as string) ?? 'apiKey';
+                const credentialType =
+                    authentication === 'oAuth2' ? 'tailscaleOAuth2Api' : 'tailscaleApi';
+                const tailnet =
+                    (this.getCurrentNodeParameters()?.tailnet as string) ?? '-';
+
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                        this as unknown as IAllExecuteFunctions,
+                        credentialType,
+                        {
+                            method: 'GET',
+                            url: `https://api.tailscale.com/api/v2/tailnet/${encodeURIComponent(tailnet)}/keys`,
+                            headers: { Accept: 'application/json' },
+                            json: true,
+                        },
+                    );
+
+                return (response.keys ?? []).map(
+                    (k: { id: string; description?: string }) => ({
+                        name: k.description ? `${k.description} (${k.id})` : k.id,
+                        value: k.id,
                     }),
                 );
             },

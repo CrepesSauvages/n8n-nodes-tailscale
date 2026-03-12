@@ -22,6 +22,21 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 | **Update Tags** | Update the ACL tags of a device |
 | **Get Routes** | Retrieve subnet routes of a device |
 
+
+### DNS
+| Operation | Description |
+|---|---|
+| **Get Nameservers** | List the global nameservers configured |
+| **Get Preferences** | Retrieve DNS preferences (MagicDNS on/off) |
+| **Get Search Paths** | List the search domains |
+| **Get Split DNS** | Retrieve the split DNS configuration (domain → nameservers) |
+| **Set Nameservers** | Set the global nameservers, replacing all existing ones |
+| **Set Preferences** | Enable or disable MagicDNS |
+| **Set Search Paths** | Set the search domains, replacing all existing ones |
+| **Set Split DNS** | Replace the entire split DNS configuration |
+| **Update Split DNS** | Update certain domains in the split DNS configuration |
+
+
 ## Credentials
 
 This node supports two authentication methods:
