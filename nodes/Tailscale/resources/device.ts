@@ -127,6 +127,40 @@ const getOperation: INodeProperties = {
             },
         },
         {
+            name: 'Set Name',
+            value: 'setName',
+            description: 'Set the name of a device',
+            action: 'Set name of a device',
+            routing: {
+                request: {
+                    method: 'POST',
+                    url: '=/api/v2/device/{{$parameter.deviceId}}/name',
+                },
+                output: {
+                    postReceive: [
+                        {
+                            type: 'set',
+                            properties: {
+                                value: '={{ { "success": true, "deviceId": $parameter.deviceId } }}',
+                            },
+                        },
+                    ],
+                },
+            },
+        },
+        {
+            name: 'Set Routes',
+            value: 'setRoutes',
+            description: 'Set the subnet routes of a device',
+            action: 'Set routes of a device',
+            routing: {
+                request: {
+                    method: 'POST',
+                    url: '=/api/v2/device/{{$parameter.deviceId}}/routes',
+                },
+            },
+        },
+        {
             name: 'Update Tags',
             value: 'updateTags',
             description: 'Update the ACL tags of a device',
@@ -155,7 +189,7 @@ const deviceIdField: INodeProperties = {
     displayOptions: {
         show: {
             resource: ['device'],
-            operation: ['get', 'delete', 'expireKey', 'authorize', 'updateTags', 'getRoutes'],
+            operation: ['get', 'delete', 'expireKey', 'authorize', 'updateTags', 'getRoutes', 'setRoutes', 'setName'],
         },
     },
 };
@@ -185,4 +219,68 @@ const tagsField: INodeProperties = {
     },
 };
 
-export const deviceDescription: INodeProperties[] = [getOperation, deviceIdField, tagsField];
+const routesField: INodeProperties = {
+    displayName: 'Routes',
+    name: 'routes',
+    type: 'fixedCollection',
+    typeOptions: {
+        multipleValues: true,
+    },
+    required: true,
+    default: { values: [] },
+    description: 'Subnet routes to advertise for this device (CIDR notation)',
+    options: [
+        {
+            displayName: 'Route',
+            name: 'values',
+            values: [
+                {
+                    displayName: 'CIDR',
+                    name: 'route',
+                    type: 'string',
+                    default: '',
+                    placeholder: '10.0.0.0/8',
+                    description: 'A subnet route in CIDR notation',
+                },
+            ],
+        },
+    ],
+    displayOptions: {
+        show: {
+            resource: ['device'],
+            operation: ['setRoutes'],
+        },
+    },
+    routing: {
+        send: {
+            type: 'body',
+            property: 'routes',
+            value: '={{ ($parameter.routes.values ?? []).map(r => r.route) }}',
+        },
+    },
+};
+
+const deviceNameField: INodeProperties = {
+    displayName: 'Name',
+    name: 'deviceName',
+    type: 'string',
+    required: true,
+    default: '',
+    placeholder: 'my-device',
+    description: 'The new name for the device',
+    displayOptions: {
+        show: {
+            resource: ['device'],
+            operation: ['setName'],
+        },
+    },
+    routing: {
+        send: {
+            type: 'body',
+            property: 'name',
+            value: '={{$value}}',
+        },
+    },
+};
+
+export const deviceDescription: INodeProperties[] = [getOperation, deviceIdField, tagsField, routesField, deviceNameField];
