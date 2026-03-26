@@ -223,8 +223,8 @@ export const authKeyDescription: INodeProperties[] = [
 	reusableField,
 	ephemeralField,
 	preauthorizedField,
-	noExpiryField,
 	keyTagsField,
+	noExpiryField,
 	expirySecondsField,
 	keyDescriptionField,
 ];

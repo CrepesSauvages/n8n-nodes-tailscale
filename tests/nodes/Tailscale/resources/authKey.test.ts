@@ -193,33 +193,10 @@ describe('authKeyDescription', () => {
 		});
 	});
 
-	// ── noExpiry field ─────────────────────────────────────────────────────
-
-	describe('noExpiry field (index 5)', () => {
-		const field = authKeyDescription[5];
-
-		it('should be named "noExpiry"', () => {
-			expect(field.name).toBe('noExpiry');
-		});
-
-		it('should be of type "boolean"', () => {
-			expect(field.type).toBe('boolean');
-		});
-
-		it('should default to false', () => {
-			expect(field.default).toBe(false);
-		});
-
-		it('should only display for authKey / create', () => {
-			expect(field.displayOptions?.show?.resource).toEqual(['authKey']);
-			expect(field.displayOptions?.show?.operation).toEqual(['create']);
-		});
-	});
-
 	// ── keyTags field ──────────────────────────────────────────────────────
 
-	describe('keyTags field (index 6)', () => {
-		const field = authKeyDescription[6];
+	describe('keyTags field (index 5)', () => {
+		const field = authKeyDescription[5];
 
 		it('should be named "keyTags"', () => {
 			expect(field.name).toBe('keyTags');
@@ -235,6 +212,29 @@ describe('authKeyDescription', () => {
 
 		it('should use loadOptionsMethod "getTags"', () => {
 			expect(field.typeOptions?.loadOptionsMethod).toBe('getTags');
+		});
+
+		it('should only display for authKey / create', () => {
+			expect(field.displayOptions?.show?.resource).toEqual(['authKey']);
+			expect(field.displayOptions?.show?.operation).toEqual(['create']);
+		});
+	});
+
+	// ── noExpiry field ─────────────────────────────────────────────────────
+
+	describe('noExpiry field (index 6)', () => {
+		const field = authKeyDescription[6];
+
+		it('should be named "noExpiry"', () => {
+			expect(field.name).toBe('noExpiry');
+		});
+
+		it('should be of type "boolean"', () => {
+			expect(field.type).toBe('boolean');
+		});
+
+		it('should default to false', () => {
+			expect(field.default).toBe(false);
 		});
 
 		it('should only display for authKey / create', () => {
