@@ -36,7 +36,8 @@ const aclOperation: INodeProperties = {
 					method: 'POST',
 					url: '=/api/v2/tailnet/{{$parameter.tailnet}}/acl/preview',
 					qs: {
-						type: 'ipv4',
+						type: "={{ $parameter.previewForIp.includes(':') ? 'ipv6' : 'ipv4' }}",
+						previewFor: '={{$parameter.previewForIp}}',
 					},
 					body: '={{JSON.parse($parameter.aclPolicy)}}',
 				},
@@ -82,8 +83,6 @@ const aclOperation: INodeProperties = {
 	default: 'get',
 };
 
-// ── Policy body ───────────────────────────────────────────────────────────────
-
 const aclPolicyField: INodeProperties = {
 	displayName: 'Policy (JSON)',
 	name: 'aclPolicy',
@@ -99,29 +98,18 @@ const aclPolicyField: INodeProperties = {
 	},
 };
 
-// ── Preview device ────────────────────────────────────────────────────────────
-
-const previewDeviceField: INodeProperties = {
-	displayName: 'Preview Device Name or ID',
-	name: 'previewDeviceId',
-	type: 'options',
+const previewForIpField: INodeProperties = {
+	displayName: 'Preview For (IP Address)',
+	name: 'previewForIp',
+	type: 'string',
 	required: true,
 	default: '',
-	description: 'The device to use when previewing access rules. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-	typeOptions: {
-		loadOptionsMethod: 'getDevices',
-	},
+	placeholder: '100.64.0.1',
+	description: 'The IPv4 or IPv6 address to preview access rules for. The type is detected automatically from the address format.',
 	displayOptions: {
 		show: {
 			resource: ['acl'],
 			operation: ['preview'],
-		},
-	},
-	routing: {
-		send: {
-			type: 'query',
-			property: 'previewFor',
-			value: '={{$value}}',
 		},
 	},
 };
@@ -129,5 +117,5 @@ const previewDeviceField: INodeProperties = {
 export const aclDescription: INodeProperties[] = [
 	aclOperation,
 	aclPolicyField,
-	previewDeviceField,
+	previewForIpField,
 ];

@@ -122,25 +122,19 @@ describe('aclDescription', () => {
 		});
 	});
 
-	// ── previewDevice field ────────────────────────────────────────────────
-
-	describe('previewDevice field (index 2)', () => {
+	describe('previewForIp field (index 2)', () => {
 		const field = aclDescription[2];
 
-		it('should be named "previewDeviceId"', () => {
-			expect(field.name).toBe('previewDeviceId');
+		it('should be named "previewForIp"', () => {
+			expect(field.name).toBe('previewForIp');
 		});
 
-		it('should be of type "options"', () => {
-			expect(field.type).toBe('options');
+		it('should be of type "string"', () => {
+			expect(field.type).toBe('string');
 		});
 
 		it('should be required', () => {
 			expect(field.required).toBe(true);
-		});
-
-		it('should use loadOptionsMethod "getDevices"', () => {
-			expect(field.typeOptions?.loadOptionsMethod).toBe('getDevices');
 		});
 
 		it('should only display for acl / preview', () => {
@@ -148,9 +142,30 @@ describe('aclDescription', () => {
 			expect(field.displayOptions?.show?.operation).toEqual(['preview']);
 		});
 
-		it('should send a "previewFor" query parameter', () => {
-			expect(field.routing?.send?.type).toBe('query');
-			expect(field.routing?.send?.property).toBe('previewFor');
+		it('should NOT use a loadOptionsMethod', () => {
+			expect(field.typeOptions?.loadOptionsMethod).toBeUndefined();
+		});
+
+		it('should NOT have routing.send (qs params are on the operation)', () => {
+			expect(field.routing).toBeUndefined();
+		});
+	});
+
+	describe('preview operation qs', () => {
+		const operationField = aclDescription[0];
+		const options = operationField.options as Array<{
+			value: string;
+			routing?: { request?: { qs?: Record<string, string> } };
+		}>;
+		const previewOp = options.find((o) => o.value === 'preview')!;
+
+		it('should include a dynamic "type" qs parameter', () => {
+			expect(previewOp.routing?.request?.qs?.type).toContain('ipv6');
+			expect(previewOp.routing?.request?.qs?.type).toContain('ipv4');
+		});
+
+		it('should include a "previewFor" qs parameter referencing previewForIp', () => {
+			expect(previewOp.routing?.request?.qs?.previewFor).toContain('previewForIp');
 		});
 	});
 });
