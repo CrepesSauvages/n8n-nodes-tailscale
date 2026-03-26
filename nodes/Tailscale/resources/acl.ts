@@ -104,8 +104,8 @@ const previewForIpField: INodeProperties = {
 	type: 'string',
 	required: true,
 	default: '',
-	placeholder: '100.64.0.1',
-	description: 'The IPv4 or IPv6 address to preview access rules for. The type is detected automatically from the address format.',
+	placeholder: '100.64.0.1 or fd7a:115c:a1e0::1',
+	description: 'A raw IPv4 or IPv6 address (not a hostname or CIDR). The protocol type is detected automatically: addresses containing ":" are treated as IPv6, all others as IPv4.',
 	displayOptions: {
 		show: {
 			resource: ['acl'],
