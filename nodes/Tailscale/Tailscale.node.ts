@@ -10,6 +10,7 @@ import { deviceDescription } from './resources/device';
 import { dnsDescription } from './resources/dns';
 import { authKeyDescription } from './resources/authKey';
 import { aclDescription } from './resources/acl';
+import { userDescription } from './resources/user';
 
 export class Tailscale implements INodeType {
     description: INodeTypeDescription = {
@@ -104,6 +105,10 @@ export class Tailscale implements INodeType {
                         name: 'DNS',
                         value: 'dns',
                     },
+                    {
+                        name: 'User',
+                        value: 'user',
+                    },
                 ],
                 default: 'device',
             },
@@ -111,6 +116,7 @@ export class Tailscale implements INodeType {
             ...authKeyDescription,
             ...deviceDescription,
             ...dnsDescription,
+            ...userDescription,
         ],
     };
 
@@ -218,6 +224,35 @@ export class Tailscale implements INodeType {
                 }
 
                 return Array.from(tagSet).map((tag) => ({ name: tag, value: tag }));
+            },
+
+            async getUsers(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+                const authentication =
+                    (this.getCurrentNodeParameters()?.authentication as string) ?? 'apiKey';
+                const credentialType =
+                    authentication === 'oAuth2' ? 'tailscaleOAuth2Api' : 'tailscaleApi';
+                const tailnet =
+                    (this.getCurrentNodeParameters()?.tailnet as string) ?? '-';
+
+                const response = await this.helpers.httpRequestWithAuthentication.call(
+                    this as unknown as IAllExecuteFunctions,
+                    credentialType,
+                    {
+                        method: 'GET',
+                        url: `https://api.tailscale.com/api/v2/tailnet/${encodeURIComponent(tailnet)}/users`,
+                        headers: { Accept: 'application/json' },
+                        json: true,
+                    },
+                );
+
+                return (response.users ?? []).map(
+                    (u: { id: string; displayName?: string; loginName?: string }) => ({
+                        name: u.displayName
+                            ? `${u.displayName} (${u.loginName ?? u.id})`
+                            : (u.loginName ?? u.id),
+                        value: u.id,
+                    }),
+                );
             },
         },
     };

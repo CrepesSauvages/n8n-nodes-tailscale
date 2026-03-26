@@ -86,6 +86,14 @@ describe('Tailscale Node', () => {
             expect(options.map((o) => o.value)).toContain('device');
         });
 
+        it('resource property should offer "User" as an option', () => {
+            const resourceProp = node.description.properties.find(
+                (p) => p.name === 'resource',
+            )!;
+            const options = resourceProp.options as Array<{ value: string }>;
+            expect(options.map((o) => o.value)).toContain('user');
+        });
+
         it('tailnet property should use loadOptionsMethod "getTailnets"', () => {
             const tailnetProp = node.description.properties.find((p) => p.name === 'tailnet')!;
             expect(tailnetProp.typeOptions?.loadOptionsMethod).toBe('getTailnets');
@@ -251,6 +259,61 @@ describe('Tailscale Node', () => {
             );
             const result = await node.methods.loadOptions.getTags.call(ctx);
             expect(result[0]).toEqual({ name: 'tag:prod', value: 'tag:prod' });
+        });
+    });
+
+    // -----------------------------------------------------------------------
+    // loadOptions.getUsers
+    // -----------------------------------------------------------------------
+
+    describe('methods.loadOptions.getUsers', () => {
+        it('should map each user to { name: "displayName (loginName)", value: id }', async () => {
+            const ctx = makeLoadOptionsCtx(
+                { authentication: 'apiKey', tailnet: '-' },
+                {},
+                {
+                    users: [
+                        { id: 'u1', displayName: 'Alice', loginName: 'alice@example.com' },
+                        { id: 'u2', displayName: 'Bob', loginName: 'bob@example.com' },
+                    ],
+                },
+            );
+            const result = await node.methods.loadOptions.getUsers.call(ctx);
+            expect(result).toEqual([
+                { name: 'Alice (alice@example.com)', value: 'u1' },
+                { name: 'Bob (bob@example.com)', value: 'u2' },
+            ]);
+        });
+
+        it('should return an empty array when there are no users', async () => {
+            const ctx = makeLoadOptionsCtx(
+                { authentication: 'apiKey', tailnet: '-' },
+                {},
+                { users: [] },
+            );
+            const result = await node.methods.loadOptions.getUsers.call(ctx);
+            expect(result).toHaveLength(0);
+        });
+
+        it('should handle a missing "users" key gracefully', async () => {
+            const ctx = makeLoadOptionsCtx(
+                { authentication: 'apiKey', tailnet: '-' },
+                {},
+                {},
+            );
+            const result = await node.methods.loadOptions.getUsers.call(ctx);
+            expect(result).toHaveLength(0);
+        });
+
+        it('should fall back to id when displayName is absent', async () => {
+            const ctx = makeLoadOptionsCtx(
+                { authentication: 'apiKey', tailnet: '-' },
+                {},
+                { users: [{ id: 'u3', loginName: 'carol@example.com' }] },
+            );
+            const result = await node.methods.loadOptions.getUsers.call(ctx);
+            expect(result[0].name).toContain('carol@example.com');
+            expect(result[0].value).toBe('u3');
         });
     });
 });
