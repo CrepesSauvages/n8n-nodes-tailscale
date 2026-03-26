@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { authKeyDescription } from '../../../../nodes/Tailscale/resources/authKey';
 
 describe('authKeyDescription', () => {
-	it('should export an array of 8 property entries', () => {
+	it('should export an array of 9 property entries', () => {
 		expect(Array.isArray(authKeyDescription)).toBe(true);
-		expect(authKeyDescription).toHaveLength(8);
+		expect(authKeyDescription).toHaveLength(9);
 	});
 
 	// ── operation field ────────────────────────────────────────────────────
@@ -193,10 +193,33 @@ describe('authKeyDescription', () => {
 		});
 	});
 
+	// ── noExpiry field ─────────────────────────────────────────────────────
+
+	describe('noExpiry field (index 5)', () => {
+		const field = authKeyDescription[5];
+
+		it('should be named "noExpiry"', () => {
+			expect(field.name).toBe('noExpiry');
+		});
+
+		it('should be of type "boolean"', () => {
+			expect(field.type).toBe('boolean');
+		});
+
+		it('should default to false', () => {
+			expect(field.default).toBe(false);
+		});
+
+		it('should only display for authKey / create', () => {
+			expect(field.displayOptions?.show?.resource).toEqual(['authKey']);
+			expect(field.displayOptions?.show?.operation).toEqual(['create']);
+		});
+	});
+
 	// ── keyTags field ──────────────────────────────────────────────────────
 
-	describe('keyTags field (index 5)', () => {
-		const field = authKeyDescription[5];
+	describe('keyTags field (index 6)', () => {
+		const field = authKeyDescription[6];
 
 		it('should be named "keyTags"', () => {
 			expect(field.name).toBe('keyTags');
@@ -222,8 +245,8 @@ describe('authKeyDescription', () => {
 
 	// ── expirySeconds field ────────────────────────────────────────────────
 
-	describe('expirySeconds field (index 6)', () => {
-		const field = authKeyDescription[6];
+	describe('expirySeconds field (index 7)', () => {
+		const field = authKeyDescription[7];
 
 		it('should be named "expirySeconds"', () => {
 			expect(field.name).toBe('expirySeconds');
@@ -241,12 +264,17 @@ describe('authKeyDescription', () => {
 			expect(field.displayOptions?.show?.resource).toEqual(['authKey']);
 			expect(field.displayOptions?.show?.operation).toEqual(['create']);
 		});
+
+		it('should be hidden when noExpiry is true', () => {
+			const showNoExpiry = field.displayOptions?.show?.noExpiry as boolean[] | undefined;
+			expect(showNoExpiry).toEqual([false]);
+		});
 	});
 
 	// ── keyDescription field ───────────────────────────────────────────────
 
-	describe('keyDescription field (index 7)', () => {
-		const field = authKeyDescription[7];
+	describe('keyDescription field (index 8)', () => {
+		const field = authKeyDescription[8];
 
 		it('should be named "keyDescription"', () => {
 			expect(field.name).toBe('keyDescription');

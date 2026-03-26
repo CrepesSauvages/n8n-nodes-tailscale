@@ -31,7 +31,7 @@ const authKeyOperation: INodeProperties = {
 								},
 							},
 						},
-						expirySeconds: '={{$parameter.expirySeconds > 0 ? $parameter.expirySeconds : undefined}}',
+						expirySeconds: '={{$parameter.noExpiry ? undefined : $parameter.expirySeconds}}',
 						description: '={{$parameter.keyDescription || undefined}}',
 					},
 				},
@@ -97,8 +97,6 @@ const authKeyOperation: INodeProperties = {
 	default: 'getMany',
 };
 
-// ── Key ID field ─────────────────────────────────────────────────────────────
-
 const keyIdField: INodeProperties = {
 	displayName: 'Key Name or ID',
 	name: 'keyId',
@@ -116,8 +114,6 @@ const keyIdField: INodeProperties = {
 		},
 	},
 };
-
-// ── Create fields ─────────────────────────────────────────────────────────────
 
 const reusableField: INodeProperties = {
 	displayName: 'Reusable',
@@ -161,6 +157,20 @@ const preauthorizedField: INodeProperties = {
 	},
 };
 
+const noExpiryField: INodeProperties = {
+	displayName: 'No Expiry',
+	name: 'noExpiry',
+	type: 'boolean',
+	default: false,
+	description: 'Whether the key should never expire. When enabled, the Expiry field is ignored.',
+	displayOptions: {
+		show: {
+			resource: ['authKey'],
+			operation: ['create'],
+		},
+	},
+};
+
 const keyTagsField: INodeProperties = {
 	displayName: 'Tag Names or IDs',
 	name: 'keyTags',
@@ -183,11 +193,12 @@ const expirySecondsField: INodeProperties = {
 	name: 'expirySeconds',
 	type: 'number',
 	default: 86400,
-	description: 'Lifetime of the key in seconds. Set to 0 for no expiry.',
+	description: 'Lifetime of the key in seconds',
 	displayOptions: {
 		show: {
 			resource: ['authKey'],
 			operation: ['create'],
+			noExpiry: [false],
 		},
 	},
 };
@@ -212,6 +223,7 @@ export const authKeyDescription: INodeProperties[] = [
 	reusableField,
 	ephemeralField,
 	preauthorizedField,
+	noExpiryField,
 	keyTagsField,
 	expirySecondsField,
 	keyDescriptionField,
