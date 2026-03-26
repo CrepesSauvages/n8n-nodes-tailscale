@@ -6,3 +6,4 @@ dist/
 .npmrc
 notes.txt
 docs/*
+.claude/
